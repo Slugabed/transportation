@@ -1,8 +1,6 @@
 #include <iostream>
-#include <memory>
 #include <map>
 #include <vector>
-#include <set>
 #include <algorithm>
 #include <cmath>
 
@@ -35,8 +33,10 @@ struct VertexDistance {
     unsigned distance;
 };
 
+void RemoveLessThanTracker(vector<int> &weights);
+
 const auto &HeapComparator = [](const VertexDistance &left, const VertexDistance &right) {
-    return left.distance >= right.distance;
+    return left.distance > right.distance;
 };
 
 unsigned CountDistance(const Graph &graph, const unsigned &count_vertex, const unsigned &max_weight) {
@@ -65,7 +65,7 @@ unsigned CountDistance(const Graph &graph, const unsigned &count_vertex, const u
             if (VertexToDistance[top_vertex] + info.time < VertexToDistance[v2]) {
                 VertexToDistance[v2] = VertexToDistance[top_vertex] + info.time;
             }
-            if (v2 == N and VertexToDistance[v2] <= MAX_TIME) {
+            if (v2 == N and VertexToDistance[v2] <= DAY_IN_MINUTES) {
                 break;
             }
         }
@@ -95,11 +95,9 @@ int main() {
         return 0;
     }
     sort_and_unique(weights);
-    const auto& pivot_tracker = stable_partition(weights.begin(), weights.end(), [graph](const unsigned& w){
-        return w >= WEIGHT_OF_TRACKER;
-    });
 
-    weights.erase(pivot_tracker, weights.end());
+    RemoveLessThanTracker(weights);
+
     if (weights.empty()){
         cout << 0;
         return 0;
@@ -117,4 +115,12 @@ int main() {
     cout << floor((weights.back() - 3000000) / 100);
 
     return 0;
+}
+
+void RemoveLessThanTracker(vector<int> &weights) {
+    const auto& pivot_tracker = stable_partition(weights.begin(), weights.end(), [](const unsigned& w){
+        return w >= WEIGHT_OF_TRACKER;
+    });
+
+    weights.erase(pivot_tracker, weights.end());
 }
