@@ -36,7 +36,7 @@ struct VertexDistance {
 void RemoveLessThanTracker(vector<int> &weights);
 
 const auto &HeapComparator = [](const VertexDistance &left, const VertexDistance &right) {
-    return left.distance > right.distance;
+    return left.distance >= right.distance;
 };
 
 unsigned CountDistance(const Graph &graph, const unsigned &count_vertex, const unsigned &max_weight) {
@@ -44,7 +44,7 @@ unsigned CountDistance(const Graph &graph, const unsigned &count_vertex, const u
     vector<VertexDistance> heap = {{1, 0}};
     while (!heap.empty()) {
         pop_heap(heap.begin(), heap.end(), HeapComparator);
-        const unsigned &top_vertex = (heap.end() - 1)->vertex;
+        const unsigned &top_vertex = heap.back().vertex;
         heap.pop_back();
         // find all adjacent edges to top_vertex from heap
         const auto &beginIt = graph.lower_bound(make_edge(top_vertex, 1));
@@ -66,7 +66,7 @@ unsigned CountDistance(const Graph &graph, const unsigned &count_vertex, const u
                 VertexToDistance[v2] = VertexToDistance[top_vertex] + info.time;
             }
             if (v2 == N and VertexToDistance[v2] <= DAY_IN_MINUTES) {
-                break;
+                return VertexToDistance[N];
             }
         }
     }
@@ -102,7 +102,7 @@ int main() {
         cout << 0;
         return 0;
     }
-
+    // TODO can use binary search
     const auto& pivot = stable_partition(weights.begin(), weights.end(), [graph](const unsigned& w){
         return IfPathExists(graph, N, w);
     });
@@ -112,7 +112,7 @@ int main() {
         return 0;
     }
     sort(weights.begin(), weights.end());
-    cout << floor((weights.back() - 3000000) / 100);
+    cout << ((weights.back() - 3'000'000) / 100);
 
     return 0;
 }
@@ -121,6 +121,5 @@ void RemoveLessThanTracker(vector<int> &weights) {
     const auto& pivot_tracker = stable_partition(weights.begin(), weights.end(), [](const unsigned& w){
         return w >= WEIGHT_OF_TRACKER;
     });
-
     weights.erase(pivot_tracker, weights.end());
 }
