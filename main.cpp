@@ -49,9 +49,9 @@ unsigned CountDistance(const Graph &graph, const unsigned &count_vertex, const u
         const auto &beginIt = graph.lower_bound(make_edge(top_vertex, 1));
         const auto &endIt = graph.upper_bound(make_edge(top_vertex, N));
 
-        for (auto EdgeInfo = beginIt; EdgeInfo != endIt; EdgeInfo++) {
-            const Info &info = EdgeInfo->second;
-            const unsigned &v2 = EdgeInfo->first.second;
+        for (auto EdgeInfoIt = beginIt; EdgeInfoIt != endIt; EdgeInfoIt++) {
+            const Info &info = EdgeInfoIt->second;
+            const unsigned &v2 = EdgeInfoIt->first.second;
             if (info.weight < max_weight) {
                 continue;
             }
@@ -101,6 +101,10 @@ int main() {
     unsigned previousWeightIndex;
     while (true) {
         if (IfPathExists(graph, N, weights[currentWeightIndex])) {
+            if (right - left == 1) {
+                currentWeightIndex = right;
+                break;
+            }
             left = currentWeightIndex;
             previousWeightIndex = currentWeightIndex;
             currentWeightIndex = ceil((right + left) / 2.0);
@@ -108,9 +112,19 @@ int main() {
                 break;
             }
         } else {
+            if (right - left == 1){
+                if (IfPathExists(graph, N, weights[left])) {
+                    currentWeightIndex = left;
+                }
+                else {
+                    cout << 0;
+                    return 0;
+                }
+                break;
+            }
             right = currentWeightIndex;
             previousWeightIndex = currentWeightIndex;
-            currentWeightIndex = ceil((right + left) / 2.0);
+            currentWeightIndex = floor((right + left) / 2.0);
             if (previousWeightIndex == currentWeightIndex) {
                 if (currentWeightIndex == 0){
                     cout << 0;
