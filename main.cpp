@@ -10,8 +10,9 @@ using namespace std;
 
 typedef pair<unsigned, unsigned> Edge;
 unsigned N, M;
-unsigned DAY_IN_MINUTES = 24 * 60;
-unsigned MAX_TIME = 10 * DAY_IN_MINUTES;
+const unsigned& DAY_IN_MINUTES = 24 * 60;
+const unsigned& MAX_TIME = 10 * DAY_IN_MINUTES;
+const unsigned& WEIGHT_OF_TRACKER = 3'000'000;
 
 Edge make_edge(unsigned v1, unsigned v2) {
     return make_pair(v1, v2);
@@ -95,50 +96,17 @@ int main() {
     }
     sort_and_unique(weights);
 
-    unsigned left = 0;
-    unsigned right = weights.size() - 1;
-    unsigned currentWeightIndex = weights.size() / 2;
-    unsigned previousWeightIndex;
-    while (true) {
-        if (IfPathExists(graph, N, weights[currentWeightIndex])) {
-            if (right - left == 1) {
-                currentWeightIndex = right;
-                break;
-            }
-            left = currentWeightIndex;
-            previousWeightIndex = currentWeightIndex;
-            currentWeightIndex = ceil((right + left) / 2.0);
-            if (previousWeightIndex == currentWeightIndex) {
-                break;
-            }
-        } else {
-            if (right - left == 1){
-                if (IfPathExists(graph, N, weights[left])) {
-                    currentWeightIndex = left;
-                }
-                else {
-                    cout << 0;
-                    return 0;
-                }
-                break;
-            }
-            right = currentWeightIndex;
-            previousWeightIndex = currentWeightIndex;
-            currentWeightIndex = floor((right + left) / 2.0);
-            if (previousWeightIndex == currentWeightIndex) {
-                if (currentWeightIndex == 0){
-                    cout << 0;
-                    return 0;
-                }
-                currentWeightIndex = currentWeightIndex - 1;
-                break;
-            }
-        }
-    }
-    if (currentWeightIndex >= 0 and weights[currentWeightIndex] - 3000000 > 0) {
-        cout << floor((weights[currentWeightIndex] - 3000000) / 100);
-    } else {
+    const auto& pivot = stable_partition(weights.begin(), weights.end(), [graph](const unsigned& w){
+        return IfPathExists(graph, N, w);
+    });
+    if (pivot == weights.begin()){
         cout << 0;
+    } else {
+        if (*prev(pivot) < WEIGHT_OF_TRACKER){
+            cout << 0;
+        } else {
+            cout << floor((*prev(pivot) - 3000000) / 100);
+        }
     }
 
     return 0;
