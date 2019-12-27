@@ -95,19 +95,26 @@ int main() {
         return 0;
     }
     sort_and_unique(weights);
+    const auto& pivot_tracker = stable_partition(weights.begin(), weights.end(), [graph](const unsigned& w){
+        return w >= WEIGHT_OF_TRACKER;
+    });
+
+    weights.erase(pivot_tracker, weights.end());
+    if (weights.empty()){
+        cout << 0;
+        return 0;
+    }
 
     const auto& pivot = stable_partition(weights.begin(), weights.end(), [graph](const unsigned& w){
         return IfPathExists(graph, N, w);
     });
-    if (pivot == weights.begin()){
+    weights.erase(pivot, weights.end());
+    if (weights.empty()){
         cout << 0;
-    } else {
-        if (*prev(pivot) < WEIGHT_OF_TRACKER){
-            cout << 0;
-        } else {
-            cout << floor((*prev(pivot) - 3000000) / 100);
-        }
+        return 0;
     }
+    sort(weights.begin(), weights.end());
+    cout << floor((weights.back() - 3000000) / 100);
 
     return 0;
 }
