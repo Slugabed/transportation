@@ -30,57 +30,46 @@ void sort_and_unique(vector<int> &v) {
 
 
 struct VertexDistance {
-    unsigned distance;
     unsigned vertex;
-};
-
-bool operator<(const VertexDistance &left, const VertexDistance &right) {
-    return left.distance < right.distance;
+    unsigned distance;
 };
 
 const auto &HeapComparator = [](const VertexDistance &left, const VertexDistance &right) {
     return left.distance >= right.distance;
 };
-//const auto &FindVertexDistanceComparator = [](const VertexDistance &left, const VertexDistance &right) {
-//    return
-//}; TODO
 
 unsigned CountDistance(const Graph &graph, const unsigned &count_vertex, const unsigned &max_weight) {
-    map<unsigned, unsigned> distance;
-    vector<VertexDistance> heap = {{0, 1}};
-    make_heap(heap.begin(), heap.end(), HeapComparator);
+    map<unsigned, unsigned> VertexToDistance = {{1, 0}, {N, MAX_TIME}};
+    vector<VertexDistance> heap = {{1, 0}};
     while (!heap.empty()) {
         pop_heap(heap.begin(), heap.end(), HeapComparator);
-        VertexDistance current = *(heap.end() - 1);
-        const unsigned &top_vertex = current.vertex;
+        const unsigned &top_vertex = (heap.end() - 1)->vertex;
         heap.pop_back();
         // find all adjacent edges to top_vertex from heap
         const auto &beginIt = graph.lower_bound(make_edge(top_vertex, 1));
         const auto &endIt = graph.upper_bound(make_edge(top_vertex, N));
 
-        for (auto it = beginIt; it != endIt; it++) {
-            const Edge &edge = it->first;
-            const Info &info = it->second;
-            const unsigned &v2 = edge.second;
+        for (auto EdgeInfo = beginIt; EdgeInfo != endIt; EdgeInfo++) {
+            const Info &info = EdgeInfo->second;
+            const unsigned &v2 = EdgeInfo->first.second;
             if (info.weight < max_weight) {
                 continue;
             }
-            if (distance.count(v2) == 0) {
-                distance[v2] = distance[top_vertex] + info.time;
-                heap.push_back({distance[v2], v2});
-                push_heap(heap.begin(), heap.end());
+            if (VertexToDistance.count(v2) == 0) {
+                VertexToDistance[v2] = VertexToDistance[top_vertex] + info.time;
+                heap.push_back({v2, VertexToDistance[v2]});
+                push_heap(heap.begin(), heap.end(), HeapComparator);
                 continue;
             }
-            if (distance[top_vertex] + info.time < distance[v2]) {
-                distance[v2] = distance[top_vertex] + info.time;
-//                binary_search(heap.begin(), heap.end(), {0, v2}, ) TODO
+            if (VertexToDistance[top_vertex] + info.time < VertexToDistance[v2]) {
+                VertexToDistance[v2] = VertexToDistance[top_vertex] + info.time;
             }
-            if (v2 == N and distance[v2] <= MAX_TIME) {
+            if (v2 == N and VertexToDistance[v2] <= MAX_TIME) {
                 break;
             }
         }
     }
-    return distance[N];
+    return VertexToDistance[N];
 }
 
 bool IfPathExists(const Graph &graph, const unsigned &count_vertex, const unsigned &max_weight){
@@ -123,8 +112,9 @@ int main() {
             previousWeightIndex = currentWeightIndex;
             currentWeightIndex = ceil((right + left) / 2.0);
             if (previousWeightIndex == currentWeightIndex) {
-                if (currentWeightIndex != weights.begin()){
-
+                if (currentWeightIndex == 0){
+                    cout << 0;
+                    return 0;
                 }
                 currentWeightIndex = currentWeightIndex - 1;
                 break;
