@@ -109,7 +109,7 @@ int main() {
         return 0;
     }
     sort(weights.begin(), weights.end());
-    cout << ((weights.back() - 3'000'000) / 100);
+    cout << ((weights.back() - 3000000) / 100);
 
     return 0;
 }
