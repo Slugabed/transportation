@@ -15,7 +15,19 @@ using namespace std;
 
 void Assert(bool b, const string &hint);
 
-ostream &operator<<(ostream &os, const vector<string> &s);
+template<class T>
+ostream &operator<<(ostream &os, const vector<T> &s) {
+    os << "{";
+    bool first = true;
+    for (const auto &x : s) {
+        if (!first) {
+            os << ", ";
+        }
+        first = false;
+        os << x;
+    }
+    return os << "}";
+}
 
 
 template<class T, class U>
